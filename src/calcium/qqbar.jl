@@ -1327,7 +1327,6 @@ end
     (R::AcbField)(a::QQBarFieldElem)
 
 Convert `a` to a complex ball with the precision of the parent field `R`.
-Throws if `a` is not a complex number.
 """
 function (R::AcbField)(a::QQBarFieldElem)
    prec = precision(R)
