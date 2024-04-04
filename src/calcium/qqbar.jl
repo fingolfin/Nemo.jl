@@ -1338,8 +1338,8 @@ end
 @doc raw"""
     guess(R::QQBarField, x::AcbFieldElem, maxdeg::Int, maxbits::Int=0)
     guess(R::QQBarField, x::ArbFieldElem, maxdeg::Int, maxbits::Int=0)
-    guess(R::QQBarField, x::RealFieldElem, maxdeg::Int, maxbits::Int=0)
     guess(R::QQBarField, x::ComplexFieldElem, maxdeg::Int, maxbits::Int=0)
+    guess(R::QQBarField, x::RealFieldElem, maxdeg::Int, maxbits::Int=0)
 
 Try to reconstruct an algebraic number from a given numerical enclosure `x`.
 The algorithm looks for candidates up to degree `maxdeg` and with
