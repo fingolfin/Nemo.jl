@@ -1337,6 +1337,9 @@ end
 
 @doc raw"""
     guess(R::QQBarField, x::AcbFieldElem, maxdeg::Int, maxbits::Int=0)
+    guess(R::QQBarField, x::ArbFieldElem, maxdeg::Int, maxbits::Int=0)
+    guess(R::QQBarField, x::RealFieldElem, maxdeg::Int, maxbits::Int=0)
+    guess(R::QQBarField, x::ComplexFieldElem, maxdeg::Int, maxbits::Int=0)
 
 Try to reconstruct an algebraic number from a given numerical enclosure `x`.
 The algorithm looks for candidates up to degree `maxdeg` and with
@@ -1355,14 +1358,16 @@ performance, one should invoke this function repeatedly with successively
 larger parameters when the size of the intended solution is unknown or
 may be much smaller than a worst-case bound.
 """
-function guess(R::QQBarField, x::AcbFieldElem, maxdeg::Int, maxbits::Int=0)
+function guess end
+
+function guess(R::QQBarField, x::T, maxdeg::Int, maxbits::Int=0) where {T <: Union{AcbFieldElem, ComplexFieldElem}}
    prec = precision(Balls)
    if maxbits <= 0
       maxbits = prec
    end
    res = QQBarFieldElem()
    found = Bool(ccall((:qqbar_guess, libcalcium),
-        Cint, (Ref{QQBarFieldElem}, Ref{AcbFieldElem}, Int, Int, Int, Int),
+        Cint, (Ref{QQBarFieldElem}, Ref{T}, Int, Int, Int, Int),
             res, x, maxdeg, maxbits, 0, prec))
    if !found
       error("No suitable algebraic number found")
@@ -1370,28 +1375,13 @@ function guess(R::QQBarField, x::AcbFieldElem, maxdeg::Int, maxbits::Int=0)
    return res
 end
 
-@doc raw"""
-    guess(R::QQBarField, x::AcbFieldElem, maxdeg::Int, maxbits::Int=0)
-
-Try to reconstruct an algebraic number from a given numerical enclosure `x`.
-The algorithm looks for candidates up to degree `maxdeg` and with
-coefficients up to size `maxbits` (which defaults to the precision of `x`
-if not given). Throws if no suitable algebraic number can be found.
-
-Guessing typically requires high precision to succeed, and it does not make
-much sense to call this function with input precision smaller than
-$O(maxdeg \cdot maxbits)$.
-If this function succeeds, then the output is guaranteed to be contained in
-the enclosure `x`, but failure does not prove that such an algebraic
-number with the specified parameters does not exist.
-
-This function does a single iteration with the target parameters. For best
-performance, one should invoke this function repeatedly with successively
-larger parameters when the size of the intended solution is unknown or
-may be much smaller than a worst-case bound.
-"""
 function guess(R::QQBarField, x::ArbFieldElem, maxdeg::Int, maxbits::Int=0)
    CC = AcbField()
+   return guess(R, CC(x), maxdeg, maxbits)
+end
+
+function guess(R::QQBarField, x::RealFieldElem, maxdeg::Int, maxbits::Int=0)
+   CC = ComplexField()
    return guess(R, CC(x), maxdeg, maxbits)
 end
 
@@ -1426,6 +1416,34 @@ function (R::AcbField)(a::QQBarFieldElem)
    z = R()
    ccall((:qqbar_get_acb, libcalcium),
         Nothing, (Ref{AcbFieldElem}, Ref{QQBarFieldElem}, Int), z, a, prec)
+   return z
+end
+
+@doc raw"""
+    (R::RealField)(a::QQBarFieldElem)
+
+Convert `a` to a real ball with the precision of the parent field `R`.
+Throws if `a` is not a real number.
+"""
+function (R::RealField)(a::QQBarFieldElem)
+   prec = precision(R)
+   z = R()
+   ccall((:qqbar_get_arb, libcalcium),
+        Nothing, (Ref{RealFieldElem}, Ref{QQBarFieldElem}, Int), z, a, prec)
+   !isfinite(z) && throw(DomainError(a, "nonreal algebraic number"))
+   return z
+end
+
+@doc raw"""
+    (R::ComplexField)(a::QQBarFieldElem)
+
+Convert `a` to a complex ball with the precision of the parent field `R`.
+"""
+function (R::ComplexField)(a::QQBarFieldElem)
+   prec = precision(R)
+   z = R()
+   ccall((:qqbar_get_acb, libcalcium),
+        Nothing, (Ref{ComplexFieldElem}, Ref{QQBarFieldElem}, Int), z, a, prec)
    return z
 end
 

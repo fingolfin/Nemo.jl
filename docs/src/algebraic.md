@@ -340,7 +340,6 @@ Root 0.100000 of 10x - 1
 **Interface**
 
 ```@docs
-guess(R::QQBarField, x::ArbFieldElem, maxdeg::Int, maxbits::Int=0)
-guess(R::QQBarField, x::AcbFieldElem, maxdeg::Int, maxbits::Int=0)
+guess
 ```
 

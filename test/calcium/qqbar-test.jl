@@ -217,6 +217,24 @@ end
       @test round(e, RoundNearest) == rn && parent(round(e, RoundNearest)) === R
       @test round(ZZRingElem, e, RoundNearest) == rn && round(ZZRingElem, e, RoundNearest) isa ZZRingElem
    end
+
+   RR = RealField()
+   CC = ComplexField()
+
+   @test RR(QQBarFieldElem(3)) == 3
+   @test CC(QQBarFieldElem(3)) == 3
+   @test_throws DomainError (RR(i))
+
+   v = sqrt(RR(2)) + sqrt(RR(3))
+   @test guess(CalciumQQBar, v, 4) == sqrt(QQBarFieldElem(2)) + sqrt(QQBarFieldElem(3))
+   @test guess(CalciumQQBar, v, 4, 10) == sqrt(QQBarFieldElem(2)) + sqrt(QQBarFieldElem(3))
+   @test_throws ErrorException guess(CalciumQQBar, v, 2)
+
+   @test guess(CalciumQQBar, CC(2+i), 2, 10) == 2+i
+
+   Rx, x = polynomial_ring(QQBar, "x")
+   @test gcd(x^4 - 4*x^2 + 4, x^2 + sqrt(QQBar(18))*x + 4) == x + sqrt(QQBar(2))
+
 end
 
 @testset "QQBarFieldElem.adhoc_operations" begin
