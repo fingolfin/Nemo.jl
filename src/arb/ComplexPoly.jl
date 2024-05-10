@@ -276,7 +276,7 @@ end
 ###############################################################################
 
 # to avoid method ambiguity errors, include `AbstractFloat, Integer, Rational` in addition to `Real`
-for T in [AbstractFloat, Integer, Rational, Real, Complex, ZZRingElem, QQFieldElem, RealFieldElem, ComplexFieldElem, ZZPolyRingElem, QQPolyRingElem]
+for T in [Union{AbstractFloat, Integer, Rational}, Real, Complex, ZZRingElem, QQFieldElem, RealFieldElem, ComplexFieldElem, ZZPolyRingElem, QQPolyRingElem]
    @eval begin
       +(x::ComplexPoly, y::$T) = x + parent(x)(y)
 
@@ -299,7 +299,7 @@ end
 ###############################################################################
 
 # to avoid method ambiguity errors, include `AbstractFloat, Integer, Rational` in addition to `Real`
-for T in [AbstractFloat, Integer, Rational, Real, Complex, ZZRingElem, QQFieldElem, RealFieldElem, ComplexFieldElem]
+for T in [Union{AbstractFloat, Integer, Rational}, Real, Complex, ZZRingElem, QQFieldElem, RealFieldElem, ComplexFieldElem]
    @eval begin
       divexact(x::ComplexPoly, y::$T; check::Bool=true) = x * inv(base_ring(parent(x))(y))
 

@@ -277,7 +277,7 @@ end
 ###############################################################################
 
 # to avoid method ambiguity errors, include `AbstractFloat, Integer, Rational` in addition to `Real`
-for T in [AbstractFloat, Integer, Rational, Real, ZZRingElem, QQFieldElem, ArbFieldElem, ZZPolyRingElem, QQPolyRingElem]
+for T in [Union{AbstractFloat, Integer, Rational}, Real, ZZRingElem, QQFieldElem, ArbFieldElem, ZZPolyRingElem, QQPolyRingElem]
    @eval begin
       +(x::ArbPolyRingElem, y::$T) = x + parent(x)(y)
 
@@ -300,7 +300,7 @@ end
 ###############################################################################
 
 # to avoid method ambiguity errors, include `AbstractFloat, Integer, Rational` in addition to `Real`
-for T in [AbstractFloat, Integer, Rational, Real, ZZRingElem, QQFieldElem, ArbFieldElem]
+for T in [Union{AbstractFloat, Integer, Rational}, Real, ZZRingElem, QQFieldElem, ArbFieldElem]
    @eval begin
       divexact(x::ArbPolyRingElem, y::$T; check::Bool=true) = x * inv(base_ring(parent(x))(y))
 
