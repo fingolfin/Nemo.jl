@@ -285,7 +285,7 @@ end
 ###############################################################################
 
 # to avoid method ambiguity errors, include `AbstractFloat, Integer, Rational` in addition to `Real`
-for T in [Union{AbstractFloat, Integer, Rational}, Real, Complex, ZZRingElem, QQFieldElem, ArbFieldElem, AcbFieldElem, ZZPolyRingElem, QQPolyRingElem]
+for T in [Union{AbstractFloat, Integer, Rational}, Union{Integer, Rational}, Real, Complex, ZZRingElem, QQFieldElem, ArbFieldElem, AcbFieldElem, ZZPolyRingElem, QQPolyRingElem]
    @eval begin
       +(x::AcbPolyRingElem, y::$T) = x + parent(x)(y)
 
@@ -308,7 +308,7 @@ end
 ###############################################################################
 
 # to avoid method ambiguity errors, include `AbstractFloat, Integer, Rational` in addition to `Real`
-for T in [Union{AbstractFloat, Integer, Rational}, Real, Complex, ZZRingElem, QQFieldElem, ArbFieldElem, AcbFieldElem]
+for T in [Union{AbstractFloat, Integer, Rational}, Union{Integer, Rational}, Real, Complex, ZZRingElem, QQFieldElem, ArbFieldElem, AcbFieldElem]
    @eval begin
       divexact(x::AcbPolyRingElem, y::$T; check::Bool=true) = x * inv(base_ring(parent(x))(y))
 
@@ -400,7 +400,7 @@ function evaluate(x::AcbPolyRingElem, y::AcbFieldElem)
    return z
 end
 
-evaluate(x::AcbPolyRingElem, y::RingElem) = evaluate(x, base_ring(parent(x))(y))
+evaluate(x::AcbPolyRingElem, y::RingElement) = evaluate(x, base_ring(parent(x))(y))
 evaluate(x::AcbPolyRingElem, y::Integer) = evaluate(x, base_ring(parent(x))(y))
 evaluate(x::AcbPolyRingElem, y::Rational) = evaluate(x, base_ring(parent(x))(y))
 evaluate(x::AcbPolyRingElem, y::Float64) = evaluate(x, base_ring(parent(x))(y))
