@@ -14,7 +14,7 @@ QQFieldElem(a::Rational{BigInt}) = QQFieldElem(ZZRingElem(a.num), ZZRingElem(a.d
 
 function QQFieldElem(a::Rational{Int})
   r = QQFieldElem()
-  ccall((:fmpq_set_si, libflint), Nothing, (Ref{QQFieldElem}, Int64, UInt64), r, numerator(a), denominator(a))
+  set!(r, numerator(a), UInt(denominator(a)))
   return r
 end
 
@@ -153,7 +153,7 @@ end
 
 function deepcopy_internal(a::QQFieldElem, dict::IdDict)
   z = QQFieldElem()
-  ccall((:fmpq_set, libflint), Nothing, (Ref{QQFieldElem}, Ref{QQFieldElem}), z, a)
+  set!(z, a)
   return z
 end
 
@@ -1093,9 +1093,44 @@ end
 #
 ###############################################################################
 
-function zero!(c::QQFieldElem)
-  ccall((:fmpq_zero, libflint), Nothing,
-        (Ref{QQFieldElem},), c)
+const QQFieldElemOrPtr = Union{QQFieldElem, Ptr{QQFieldElem}}
+
+_num_ptr(c::QQFieldElem) = Ptr{ZZRingElem}(pointer_from_objref(c))
+_num_ptr(c::Ptr{QQFieldElem}) = Ptr{ZZRingElem}(c)
+_den_ptr(c::QQFieldElemOrPtr) = _num_ptr(c) + sizeof(ZZRingElem)
+
+function zero!(c::QQFieldElemOrPtr)
+  @ccall libflint.fmpq_zero(c::Ref{QQFieldElem})::Nothing
+  return c
+end
+
+function one!(c::QQFieldElemOrPtr)
+  set!(c, 1)
+end
+
+function set!(c::QQFieldElemOrPtr, a::QQFieldElemOrPtr)
+  @ccall libflint.fmpq_set(c::Ref{QQFieldElem}, a::Ref{QQFieldElem})::Nothing
+  return c
+end
+
+function set!(c::QQFieldElemOrPtr, a::Int, b::UInt = UInt(1))
+  @ccall libflint.fmpq_set_si(c::Ref{QQFieldElem}, a::Int, b::UInt)::Nothing
+  return c
+end
+
+function set!(c::QQFieldElemOrPtr, a::UInt, b::UInt = UInt(1))
+  @ccall libflint.fmpq_set_ui(c::Ref{QQFieldElem}, a::UInt, b::UInt)::Nothing
+  return c
+end
+
+function set!(c::QQFieldElemOrPtr, a::ZZRingElem, b::ZZRingElem)
+  @ccall libflint.fmpq_set_fmpz_frac(c::Ref{QQFieldElem}, a::Ref{ZZRingElem}, b::Ref{ZZRingElem})::Nothing
+  return c
+end
+
+function set!(c::QQFieldElemOrPtr, a::ZZRingElem)
+  set!(_num_ptr(c), a)
+  one!(_den_ptr(c))
   return c
 end
 

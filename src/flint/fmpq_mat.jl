@@ -91,7 +91,7 @@ getindex(x::QQMatrix, r::AbstractUnitRange{Int}, c::AbstractUnitRange{Int}) = su
 function getindex!(v::QQFieldElem, a::QQMatrix, r::Int, c::Int)
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpq_set, libflint), Nothing, (Ref{QQFieldElem}, Ptr{QQFieldElem}), v, z)
+    set!(v, z)
   end
   return v
 end
@@ -101,7 +101,7 @@ end
   v = QQFieldElem()
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpq_set, libflint), Nothing, (Ref{QQFieldElem}, Ptr{QQFieldElem}), v, z)
+    set!(v, z)
   end
   return v
 end
@@ -109,12 +109,8 @@ end
 @inline function setindex!(a::QQMatrix, d::ZZRingElem, r::Int, c::Int)
   @boundscheck Generic._checkbounds(a, r, c)
   GC.@preserve a begin
-    z = ccall((:fmpq_mat_entry_num, libflint), Ptr{ZZRingElem},
-              (Ref{QQMatrix}, Int, Int), a, r - 1, c - 1)
+    z = mat_entry_ptr(a, r, c)
     set!(z, d)
-    z = ccall((:fmpq_mat_entry_den, libflint), Ptr{ZZRingElem},
-              (Ref{QQMatrix}, Int, Int), a, r - 1, c - 1)
-    one!(z)
   end
 end
 
@@ -122,19 +118,19 @@ end
   @boundscheck Generic._checkbounds(a, r, c)
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpq_set, libflint), Nothing, (Ptr{QQFieldElem}, Ref{QQFieldElem}), z, d)
+    set!(z, d)
   end
 end
 
 Base.@propagate_inbounds setindex!(a::QQMatrix, d::Integer,
                                    r::Int, c::Int) =
-setindex!(a, QQFieldElem(d), r, c)
+  setindex!(a, ZZRingElem(d), r, c)
 
 @inline function setindex!(a::QQMatrix, d::Int, r::Int, c::Int)
   @boundscheck Generic._checkbounds(a, r, c)
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpq_set_si, libflint), Nothing, (Ptr{QQFieldElem}, Int, Int), z, d, 1)
+    set!(z, d)
   end
 end
 
