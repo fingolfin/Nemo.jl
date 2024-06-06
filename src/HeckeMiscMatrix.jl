@@ -45,47 +45,53 @@ end
 ################################################################################
 
 function maximum(f::typeof(abs), a::ZZMatrix)
-  m = mat_entry_ptr(a, 1, 1)
-  for i = 1:nrows(a)
-    for j = 1:ncols(a)
-      z = mat_entry_ptr(a, i, j)
-      if ccall((:fmpz_cmpabs, libflint), Cint, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, z) < 0
-        m = z
+  r = ZZRingElem()
+  GC.@preserve a r begin
+    m = mat_entry_ptr(a, 1, 1)
+    for i = 1:nrows(a)
+      for j = 1:ncols(a)
+        z = mat_entry_ptr(a, i, j)
+        if ccall((:fmpz_cmpabs, libflint), Cint, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, z) < 0
+          m = z
+        end
       end
     end
+    ccall((:fmpz_abs, libflint), Nothing, (Ref{ZZRingElem}, Ptr{ZZRingElem}), r, m)
   end
-  r = ZZRingElem()
-  ccall((:fmpz_abs, libflint), Nothing, (Ref{ZZRingElem}, Ptr{ZZRingElem}), r, m)
   return r
 end
 
 function maximum(a::ZZMatrix)
-  m = mat_entry_ptr(a, 1, 1)
-  for i = 1:nrows(a)
-    for j = 1:ncols(a)
-      z = mat_entry_ptr(a, i, j)
-      if ccall((:fmpz_cmp, libflint), Cint, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, z) < 0
-        m = z
+  r = ZZRingElem()
+  GC.@preserve a r begin
+    m = mat_entry_ptr(a, 1, 1)
+    for i = 1:nrows(a)
+      for j = 1:ncols(a)
+        z = mat_entry_ptr(a, i, j)
+        if ccall((:fmpz_cmp, libflint), Cint, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, z) < 0
+          m = z
+        end
       end
     end
+    set!(r, m)
   end
-  r = ZZRingElem()
-  set!(r, m)
   return r
 end
 
 function minimum(a::ZZMatrix)
-  m = mat_entry_ptr(a, 1, 1)
-  for i = 1:nrows(a)
-    for j = 1:ncols(a)
-      z = mat_entry_ptr(a, i, j)
-      if ccall((:fmpz_cmp, libflint), Cint, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, z) > 0
-        m = z
+  r = ZZRingElem()
+  GC.@preserve a r begin
+    m = mat_entry_ptr(a, 1, 1)
+    for i = 1:nrows(a)
+      for j = 1:ncols(a)
+        z = mat_entry_ptr(a, i, j)
+        if ccall((:fmpz_cmp, libflint), Cint, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, z) > 0
+          m = z
+        end
       end
     end
+    set!(r, m)
   end
-  r = ZZRingElem()
-  set!(r, m)
   return r
 end
 
@@ -160,8 +166,10 @@ end
 
 #Returns a positive integer if A[i, j] > b, negative if A[i, j] < b, 0 otherwise
 function compare_index(A::ZZMatrix, i::Int, j::Int, b::ZZRingElem)
-  a = mat_entry_ptr(A, i, j)
-  return ccall((:fmpz_cmp, libflint), Int32, (Ptr{ZZRingElem}, Ref{ZZRingElem}), a, b)
+  GC.@preserve A begin
+    a = mat_entry_ptr(A, i, j)
+    return ccall((:fmpz_cmp, libflint), Int32, (Ptr{ZZRingElem}, Ref{ZZRingElem}), a, b)
+  end
 end
 
 function round!(b::ZZMatrix, a::ArbMatrix)
@@ -176,13 +184,15 @@ end
 
 
 function shift!(g::ZZMatrix, l::Int)
-  for i = 1:nrows(g)
-    for j = 1:ncols(g)
-      z = mat_entry_ptr(g, i, j)
-      if l > 0
-        ccall((:fmpz_mul_2exp, libflint), Nothing, (Ptr{ZZRingElem}, Ptr{ZZRingElem}, Int), z, z, l)
-      else
-        ccall((:fmpz_tdiv_q_2exp, libflint), Nothing, (Ptr{ZZRingElem}, Ptr{ZZRingElem}, Int), z, z, -l)
+  GC.@preserve g begin
+    for i = 1:nrows(g)
+      for j = 1:ncols(g)
+        z = mat_entry_ptr(g, i, j)
+        if l > 0
+          ccall((:fmpz_mul_2exp, libflint), Nothing, (Ptr{ZZRingElem}, Ptr{ZZRingElem}, Int), z, z, l)
+        else
+          ccall((:fmpz_tdiv_q_2exp, libflint), Nothing, (Ptr{ZZRingElem}, Ptr{ZZRingElem}, Int), z, z, -l)
+        end
       end
     end
   end

@@ -811,17 +811,19 @@ function hadamard_bound2(M::ZZMatrix)
   H = ZZ(1);
   r = ZZ(0)
   n = nrows(M)
-  for i in 1:n
-    zero!(r)
-    M_ptr = Nemo.mat_entry_ptr(M, i, 1)
-    for j in 1:n
-      ccall((:fmpz_addmul, Nemo.libflint), Cvoid, (Ref{ZZRingElem}, Ptr{ZZRingElem}, Ptr{ZZRingElem}), r, M_ptr, M_ptr)
-      M_ptr += sizeof(ZZRingElem)
+  GC.@preserve M begin
+    for i in 1:n
+      zero!(r)
+      M_ptr = mat_entry_ptr(M, i, 1)
+      for j in 1:n
+        ccall((:fmpz_addmul, libflint), Cvoid, (Ref{ZZRingElem}, Ptr{ZZRingElem}, Ptr{ZZRingElem}), r, M_ptr, M_ptr)
+        M_ptr += sizeof(ZZRingElem)
+      end
+      if iszero(r)
+        return r
+      end
+      mul!(H, H, r)
     end
-    if iszero(r)
-      return r
-    end
-    Nemo.mul!(H, H, r)
   end
   return H
 end
@@ -832,7 +834,7 @@ function Base.maximum(::typeof(nbits), M::ZZMatrix)
   m = ncols(M)
   Base.GC.@preserve M begin
     for i in 1:n
-      M_ptr = Nemo.mat_entry_ptr(M, i, 1)
+      M_ptr = mat_entry_ptr(M, i, 1)
       for j in 1:m
         #a zero fmpz is a binary zero, hence this works
         #fmpz_bits does not work on 0 I think (at least is it unneccessary)
@@ -847,6 +849,7 @@ function Base.maximum(::typeof(nbits), M::ZZMatrix)
   end
   return Int(mx)
 end
+
 ###############################################################################
 #
 #   Gram matrix
@@ -1656,7 +1659,7 @@ function _solve_triu_left(U::ZZMatrix, b::ZZMatrix)
   tmp = zero_matrix(ZZ, 1, n)
   t = R()
   s = R()
-  GC.@preserve X b tmp begin
+  GC.@preserve U b X tmp begin
     for i = 1:m
       tmp_p = mat_entry_ptr(tmp, 1, 1)
       X_p = mat_entry_ptr(X, i, 1)
@@ -1698,7 +1701,7 @@ function _solve_triu(U::ZZMatrix, b::ZZMatrix)
   X = zero(b)
   tmp = zero_matrix(ZZ, 1, n)
   s = ZZ()
-  GC.@preserve U b tmp begin
+  GC.@preserve U b X tmp begin
     for i = 1:m
       tmp_ptr = mat_entry_ptr(tmp, 1, 1)
       for j = 1:n

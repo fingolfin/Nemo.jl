@@ -1128,7 +1128,15 @@ function set!(c::QQFieldElemOrPtr, a::ZZRingElem, b::ZZRingElem)
   return c
 end
 
-function set!(c::QQFieldElemOrPtr, a::ZZRingElem)
+function set!(c::QQFieldElem, a::ZZRingElem)
+  GC.@preserve c begin
+    set!(_num_ptr(c), a)
+    one!(_den_ptr(c))
+  end
+  return c
+end
+
+function set!(c::Ptr{QQFieldElem}, a::ZZRingElem)
   set!(_num_ptr(c), a)
   one!(_den_ptr(c))
   return c
