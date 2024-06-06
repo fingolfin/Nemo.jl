@@ -2599,23 +2599,29 @@ end
 #
 ###############################################################################
 
-function zero!(z::ZZRingElem)
-  ccall((:fmpz_zero, libflint), Nothing,
-        (Ref{ZZRingElem},), z)
+const ZZRingElemOrPtr = Union{ZZRingElem, Ptr{ZZRingElem}}
+
+function zero!(z::ZZRingElemOrPtr)
+  @ccall libflint.fmpz_zero(z::Ref{ZZRingElem})::Nothing
   return z
 end
 
-function one!(z::ZZRingElem)
-  ccall((:fmpz_set_ui, libflint), Nothing,
-        (Ref{ZZRingElem}, UInt),
-        z, 1)
+function one!(z::ZZRingElemOrPtr)
+  set!(z, UInt(1))
+end
+
+function set!(z::ZZRingElemOrPtr, a::ZZRingElemOrPtr)
+  @ccall libflint.fmpz_set(z::Ref{ZZRingElem}, a::Ref{ZZRingElem})::Nothing
   return z
 end
 
-function set!(z::ZZRingElem, a::ZZRingElem)
-  ccall((:fmpz_set, libflint), Nothing,
-        (Ref{ZZRingElem}, Ref{ZZRingElem}),
-        z, a)
+function set!(z::ZZRingElemOrPtr, a::Int)
+  @ccall libflint.fmpz_set_si(z::Ref{ZZRingElem}, a::Int)::Nothing
+  return z
+end
+
+function set!(z::ZZRingElemOrPtr, a::UInt)
+  @ccall libflint.fmpz_set_ui(z::Ref{ZZRingElem}, a::UInt)::Nothing
   return z
 end
 
