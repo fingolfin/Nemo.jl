@@ -4891,8 +4891,7 @@ mutable struct ZZMatrix <: MatElem{ZZRingElem}
     GC.@preserve z for i = 1:r
       for j = 1:c
         el = mat_entry_ptr(z, i, j)
-        ccall((:fmpz_set, libflint), Nothing,
-              (Ptr{ZZRingElem}, Ref{ZZRingElem}), el, arr[i, j])
+        set!(el, arr[i, j])
       end
     end
     return z
@@ -4903,8 +4902,7 @@ mutable struct ZZMatrix <: MatElem{ZZRingElem}
     GC.@preserve z for i = 1:r
       for j = 1:c
         el = mat_entry_ptr(z, i, j)
-        ccall((:fmpz_set, libflint), Nothing,
-              (Ptr{ZZRingElem}, Ref{ZZRingElem}), el, arr[(i-1)*c+j])
+        set!(el, arr[(i-1)*c+j])
       end
     end
     return z
@@ -4915,8 +4913,7 @@ mutable struct ZZMatrix <: MatElem{ZZRingElem}
     GC.@preserve z for i = 1:r
       for j = 1:c
         el = mat_entry_ptr(z, i, j)
-        ccall((:fmpz_set, libflint), Nothing,
-              (Ptr{ZZRingElem}, Ref{ZZRingElem}), el, ZZRingElem(arr[i, j]))
+        set!(el, ZZRingElem(arr[i, j]))
       end
     end
     return z
@@ -4927,8 +4924,7 @@ mutable struct ZZMatrix <: MatElem{ZZRingElem}
     GC.@preserve z for i = 1:r
       for j = 1:c
         el = mat_entry_ptr(z, i, j)
-        ccall((:fmpz_set, libflint), Nothing,
-              (Ptr{ZZRingElem}, Ref{ZZRingElem}), el, ZZRingElem(arr[(i-1)*c+j]))
+        set!(el, ZZRingElem(arr[(i-1)*c+j]))
       end
     end
     return z
@@ -4938,8 +4934,7 @@ mutable struct ZZMatrix <: MatElem{ZZRingElem}
     z = ZZMatrix(r, c)
     GC.@preserve z for i = 1:min(r, c)
       el = mat_entry_ptr(z, i, i)
-      ccall((:fmpz_set, libflint), Nothing,
-            (Ptr{ZZRingElem}, Ref{ZZRingElem}), el, d)
+      set!(el, d)
     end
     return z
   end

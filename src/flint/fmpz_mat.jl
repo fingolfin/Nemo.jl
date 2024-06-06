@@ -112,7 +112,7 @@ getindex(x::ZZMatrix, r::AbstractUnitRange{Int}, c::AbstractUnitRange{Int}) = su
 function getindex!(v::ZZRingElem, a::ZZMatrix, r::Int, c::Int)
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpz_set, libflint), Nothing, (Ref{ZZRingElem}, Ptr{ZZRingElem}), v, z)
+    set!(v, z)
   end
 end
 
@@ -121,7 +121,7 @@ end
   v = ZZRingElem()
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpz_set, libflint), Nothing, (Ref{ZZRingElem}, Ptr{ZZRingElem}), v, z)
+    set!(v, z)
   end
   return v
 end
@@ -130,7 +130,7 @@ end
   @boundscheck Generic._checkbounds(a, r, c)
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpz_set, libflint), Nothing, (Ptr{ZZRingElem}, Ref{ZZRingElem}), z, d)
+    set!(z, d)
   end
 end
 
@@ -140,7 +140,7 @@ end
   @boundscheck Generic._checkbounds(a, r, c)
   GC.@preserve a begin
     z = mat_entry_ptr(a, r, c)
-    ccall((:fmpz_set_si, libflint), Nothing, (Ptr{ZZRingElem}, Int), z, d)
+    set!(z, d)
   end
 end
 
@@ -812,7 +812,7 @@ function hadamard_bound2(M::ZZMatrix)
   r = ZZ(0)
   n = nrows(M)
   for i in 1:n
-    ccall((:fmpz_set_si, Nemo.libflint), Cvoid, (Ref{ZZRingElem}, Int), r, 0)
+    zero!(r)
     M_ptr = Nemo.mat_entry_ptr(M, i, 1)
     for j in 1:n
       ccall((:fmpz_addmul, Nemo.libflint), Cvoid, (Ref{ZZRingElem}, Ptr{ZZRingElem}, Ptr{ZZRingElem}), r, M_ptr, M_ptr)
@@ -1544,7 +1544,7 @@ function Base.cat(A::ZZMatrix...;dims)
         A_ptr = mat_entry_ptr(Ai, k, 1)
         X_ptr = mat_entry_ptr(X, start_row + k, start_col+1)
         for l = 1:ncols(Ai)
-          ccall((:fmpz_set, libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), X_ptr, A_ptr)
+          set!(X_ptr, A_ptr)
           X_ptr += sizeof(ZZRingElem)
           A_ptr += sizeof(ZZRingElem)
         end
@@ -1569,7 +1569,7 @@ function AbstractAlgebra._vcat(A::AbstractVector{ZZMatrix})
         M_ptr = mat_entry_ptr(M, s+j, 1)
         N_ptr = mat_entry_ptr(N, j, 1)
         for k in 1:ncols(N)
-          ccall((:fmpz_set, libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), M_ptr, N_ptr)
+          set!(M_ptr, N_ptr)
           M_ptr += sizeof(ZZRingElem)
           N_ptr += sizeof(ZZRingElem)
         end
@@ -1594,7 +1594,7 @@ function AbstractAlgebra._hcat(A::AbstractVector{ZZMatrix})
         M_ptr = mat_entry_ptr(M, j, s+1)
         N_ptr = mat_entry_ptr(N, j, 1)
         for k in 1:ncols(N)
-          ccall((:fmpz_set, libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), M_ptr, N_ptr)
+          set!(M_ptr, N_ptr)
           M_ptr += sizeof(ZZRingElem)
           N_ptr += sizeof(ZZRingElem)
         end
@@ -1661,7 +1661,7 @@ function _solve_triu_left(U::ZZMatrix, b::ZZMatrix)
       tmp_p = mat_entry_ptr(tmp, 1, 1)
       X_p = mat_entry_ptr(X, i, 1)
       for j = 1:n
-        ccall((:fmpz_set, Nemo.libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), tmp_p, X_p)
+        set!(tmp_p, X_p)
         X_p += sizeof(ZZRingElem)
         tmp_p += sizeof(ZZRingElem)
       end
@@ -1682,7 +1682,7 @@ function _solve_triu_left(U::ZZMatrix, b::ZZMatrix)
       tmp_p = mat_entry_ptr(tmp, 1, 1)
       X_p = mat_entry_ptr(X, i, 1)
       for j = 1:n
-        ccall((:fmpz_set, Nemo.libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), X_p, tmp_p)
+        set!(X_p, tmp_p)
         X_p += sizeof(ZZRingElem)
         tmp_p += sizeof(ZZRingElem)
       end
@@ -1703,7 +1703,7 @@ function _solve_triu(U::ZZMatrix, b::ZZMatrix)
       tmp_ptr = mat_entry_ptr(tmp, 1, 1)
       for j = 1:n
         X_ptr = mat_entry_ptr(X, j, i)
-        ccall((:fmpz_set, Nemo.libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), tmp_ptr, X_ptr)
+        set!(tmp_ptr, X_ptr)
         tmp_ptr += sizeof(ZZRingElem)
       end
       for j = n:-1:1
@@ -1727,7 +1727,7 @@ function _solve_triu(U::ZZMatrix, b::ZZMatrix)
       tmp_ptr = mat_entry_ptr(tmp, 1, 1)
       for j = 1:n
         X_ptr = mat_entry_ptr(X, j, i)
-        ccall((:fmpz_set, Nemo.libflint), Cvoid, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), X_ptr, tmp_ptr)
+        set!(X_ptr, tmp_ptr)
         tmp_ptr += sizeof(ZZRingElem)
       end
     end

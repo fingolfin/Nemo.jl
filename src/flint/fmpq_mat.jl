@@ -111,10 +111,10 @@ end
   GC.@preserve a begin
     z = ccall((:fmpq_mat_entry_num, libflint), Ptr{ZZRingElem},
               (Ref{QQMatrix}, Int, Int), a, r - 1, c - 1)
-    ccall((:fmpz_set, libflint), Nothing, (Ptr{ZZRingElem}, Ref{ZZRingElem}), z, d)
+    set!(z, d)
     z = ccall((:fmpq_mat_entry_den, libflint), Ptr{ZZRingElem},
               (Ref{QQMatrix}, Int, Int), a, r - 1, c - 1)
-    ccall((:fmpz_set_si, libflint), Nothing, (Ptr{ZZRingElem}, Int), z, 1)
+    one!(z)
   end
 end
 

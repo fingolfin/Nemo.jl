@@ -348,8 +348,7 @@ end
 ###############################################################################
 
 function zero!(z::FpFieldElem)
-  ccall((:fmpz_set_ui, libflint), Nothing,
-        (Ref{ZZRingElem}, UInt), z.data, UInt(0))
+  zero!(z.data)
   return z
 end
 

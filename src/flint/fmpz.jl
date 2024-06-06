@@ -184,7 +184,7 @@ end
 
 function deepcopy_internal(a::ZZRingElem, dict::IdDict)
   z = ZZRingElem()
-  ccall((:fmpz_set, libflint), Nothing, (Ref{ZZRingElem}, Ref{ZZRingElem}), z, a)
+  set!(z, a)
   return z
 end
 

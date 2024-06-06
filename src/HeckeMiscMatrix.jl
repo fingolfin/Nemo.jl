@@ -70,7 +70,7 @@ function maximum(a::ZZMatrix)
     end
   end
   r = ZZRingElem()
-  ccall((:fmpz_set, libflint), Nothing, (Ref{ZZRingElem}, Ptr{ZZRingElem}), r, m)
+  set!(r, m)
   return r
 end
 
@@ -85,7 +85,7 @@ function minimum(a::ZZMatrix)
     end
   end
   r = ZZRingElem()
-  ccall((:fmpz_set, libflint), Nothing, (Ref{ZZRingElem}, Ptr{ZZRingElem}), r, m)
+  set!(r, m)
   return r
 end
 
@@ -117,7 +117,7 @@ function lift(a::ZZModMatrix)
       for j in 1:ncols(a)
         m = mat_entry_ptr(z, i, j)
         n = mat_entry_ptr(a, i, j)
-        ccall((:fmpz_set, libflint), Nothing, (Ptr{ZZRingElem}, Ptr{ZZRingElem}), m, n)
+        set!(m, n)
         #z[i, j] = lift(a[i, j])
       end
     end

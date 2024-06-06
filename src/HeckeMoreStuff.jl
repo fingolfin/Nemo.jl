@@ -1241,12 +1241,12 @@ function derivative(x::AcbPolyRingElem, n::Int64)
 end
 
 function lift!(x::fpFieldElem, z::ZZRingElem)
-  ccall((:fmpz_set_ui, libflint), Nothing, (Ref{ZZRingElem}, UInt), z, x.data)
+  set!(z, x.data)
   return z
 end
 
 function lift!(x::EuclideanRingResidueFieldElem{ZZRingElem}, z::ZZRingElem)
-  ccall((:fmpz_set, libflint), Nothing, (Ref{ZZRingElem}, Ref{ZZRingElem}), z, x.data)
+  set!(z, x.data)
   return z
 end
 
