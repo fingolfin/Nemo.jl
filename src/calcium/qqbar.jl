@@ -1485,14 +1485,19 @@ function ZZRingElem(a::QQBarFieldElem)
 end
 
 function (::Type{ComplexF64})(x::QQBarFieldElem)
-  z = AcbField(53, cached = false)(x)
-  x = ArbFieldElem()
-  ccall((:acb_get_real, libflint), Nothing, (Ref{ArbFieldElem}, Ref{AcbFieldElem}), x, z)
+  z = AcbField(57, cached = false)(x)
+  x = real(z)
   xx = Float64(x)
-  y = ArbFieldElem()
-  ccall((:acb_get_imag, libflint), Nothing, (Ref{ArbFieldElem}, Ref{AcbFieldElem}), y, z)
+  y = imag(z)
   yy = Float64(y)
   return ComplexF64(xx, yy)
+end
+
+function (::Type{Float64})(x::QQBarFieldElem)
+  isreal(x) || throw(InexactError(:Float64, Float64, x))
+  z = AcbField(57, cached = false)(x)
+  x = real(z)
+  return Float64(x)
 end
 
 ###############################################################################
