@@ -122,9 +122,7 @@ end
 ###############################################################################
 
 mutable struct n_factor
-  num::Cint
-  exp::NTuple{15, Cint}
-  p::NTuple{15, UInt}
+  data::Flint.n_factor_t
 
   function n_factor()
     z = new()
